@@ -36,6 +36,11 @@ class PricingRule(models.Model):
             return
         return self.specific_day
 
+    def has_double_condition(self):
+        if self.specific_day and self.min_stay_length:
+            return True
+        return False
+
 
 class Booking(models.Model):
     """

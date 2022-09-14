@@ -52,14 +52,18 @@ class BookingDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
-
-@api_view(['GET', 'POST'])
-def get_post_booking_view(request):
+class BookingListView(generics.ListCreateAPIView):
     """
-    :[POST]:
-        Description: List all Bookings
+    List all Bookings
+    """
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('id', 'property', 'date_start', 'date_end', 'final_price')
 
-    :[GET]:
+    def post(self, request, *args, **kwargs):
+        """
+            :[POST]:
         Description: Create a new Booking.
         Summary:
             . Check the Booking is valid. Handle Exception.
@@ -71,15 +75,7 @@ def get_post_booking_view(request):
                 Description: Booking item successfully created.
             '400':
                 Description: Bad Request.
-
-    """
-
-
-    if request.method == 'GET':
-        bookings = Booking.objects.all()
-        serializer = BookingSerializer(bookings, many=True)
-        return Response(serializer.data)
-    if request.method == 'POST':
+        """
         valid_reservation = check_reservation_is_valid(request.data)
         if not valid_reservation:
             # TODO: HANDLE THIS!
@@ -96,12 +92,13 @@ def get_post_booking_view(request):
 
         days_list = pd.date_range(request.data.get('date_start'), request.data.get('date_end'))
 
+
         rules_to_apply = get_rules_to_apply(days_list, property_pricing_rules)
 
         if not rules_to_apply:
             final_price = float(len(days_list) * selected_property.base_price)
         else:
-            final_price = apply_rules(days_list, rules_to_apply, selected_property.base_price)
+            final_price = apply_rules(days_list, selected_property.base_price, rules_to_apply)
 
         data = {
             "property": request.data.get('property'),
@@ -114,3 +111,4 @@ def get_post_booking_view(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

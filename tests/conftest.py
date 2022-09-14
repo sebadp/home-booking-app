@@ -6,6 +6,9 @@ django.setup()
 
 from core.models import Property, PricingRule
 
+from django.core.management import call_command
+
+
 
 @pytest.fixture
 def property_standard():

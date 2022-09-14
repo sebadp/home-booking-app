@@ -14,6 +14,7 @@ def filter_from_similar_rules(rules:list[PricingRule]) -> list[PricingRule]:
     groups = []
     uniquekeys = []
     key_func = lambda x: x.get_key_field
+
     for k, g in groupby(rules, key_func):
         groups.append(list(g))  # Store group iterator as a list
         uniquekeys.append(k)
@@ -25,6 +26,12 @@ def filter_from_similar_rules(rules:list[PricingRule]) -> list[PricingRule]:
     return min_stay_length_rules
 
 
+def filter_double_condition_rules(rules:list[PricingRule], days_list: DatetimeIndex) -> list[PricingRule]:
+    days_list = list(days_list)
+    rules = [rule for rule in rules if rule.has_double_condition()]
+    rules = [rule for rule in rules if rule.specific_day in days_list]
+    return rules
+
 def filter_specific_day_rules(rules:list[PricingRule], days_list: DatetimeIndex) -> list[PricingRule]:
     """Select Specific Day rules that include a rule at the booking days_list.
        Select rules with priority.
@@ -35,6 +42,7 @@ def filter_specific_day_rules(rules:list[PricingRule], days_list: DatetimeIndex)
         List of PricingRules filtered.
     """
     days_list = list(days_list)
+
     rules = [rule for rule in rules if rule.specific_day in days_list]
     rules = filter_from_similar_rules(rules)
     return rules
@@ -67,7 +75,10 @@ def get_rules_to_apply(days_list: DatetimeIndex, pricing_rules:list[PricingRule]
     """
     valid_rules = []
     total_days = len(days_list)
-    specific_day_rules = list(filter(lambda rule: rule.specific_day is not None, pricing_rules))
+
+    double_condition_rules = [rule for rule in pricing_rules if (rule.specific_day and rule.min_stay_length) in days_list]
+    remaining_rules = list(set(pricing_rules) - set(double_condition_rules))
+    specific_day_rules = list(filter(lambda rule: rule.specific_day is not None, remaining_rules))
     min_stay_length_rules = list(set(pricing_rules) - set(specific_day_rules))
 
     if specific_day_rules:
@@ -81,10 +92,53 @@ def get_rules_to_apply(days_list: DatetimeIndex, pricing_rules:list[PricingRule]
         if filtered_rules:
             valid_rules.append(filtered_rules)
 
+    if double_condition_rules:
+        double_rules = filter_specific_day_rules(specific_day_rules, days_list)
+        if not double_rules:
+            return valid_rules
+
+        double_rules = filter_min_stay_rules(min_stay_length_rules, total_days)
+        if double_rules:
+            for rule in double_rules:
+                valid_rules.append(rule)
+
     return valid_rules
 
+def apply_double_rule(rule, day_list) -> float:
+    return float(rule.fixed_price * len(day_list))
 
-def apply_rules(days_list: DatetimeIndex, rules_to_apply: list[PricingRule], base_price:float) -> float:
+def get_booking_prices(days_list: DatetimeIndex, rules_to_apply: list[PricingRule]) -> (float, list, float):
+
+    price_modifier = float()
+    special_day_list = list()
+    fixed_price = float()
+
+    for rule in rules_to_apply:
+
+
+
+        if rule.min_stay_length:
+            price_modifier = rule.price_modifier
+        if rule.specific_day:
+            special_day_list.append(rule.specific_day)
+            fixed_price = rule.fixed_price
+
+        # If rule has min_stay_length , it means both conditions need to be true.
+        if rule.has_double_condition():
+            return apply_double_rule(rule, days_list)
+
+        # If a rule has a price_modifier and a fixed_price, fixed_price should be used.
+        # If this rule is min_stay_length, this means that is TOP priority?
+        if rule.fixed_price and rule.price_modifier:
+            rule.price_modifier = None
+            if rule.min_stay_length:
+                return apply_double_rule(rule, days_list)
+            fixed_price = rule.fixed_price
+
+    return price_modifier, special_day_list, fixed_price
+
+
+def apply_rules(days_list: DatetimeIndex, base_price: float, rules_to_apply: list[PricingRule]) -> float:
     """Apply the appropriate rule for each day.
     Args:
         days_list: List of all dates to be booked.
@@ -94,15 +148,9 @@ def apply_rules(days_list: DatetimeIndex, rules_to_apply: list[PricingRule], bas
         The sum of all charges for every day.
     """
     total = list()
-    price_modifier = float()
-    special_day_list = list()
-    fixed_price = float()
-    for rule in rules_to_apply:
-        if rule.min_stay_length:
-            price_modifier = rule.price_modifier
-        if rule.specific_day:
-            special_day_list.append(rule.specific_day)
-            fixed_price = rule.fixed_price
+
+
+    price_modifier, special_day_list, fixed_price = get_booking_prices(days_list, rules_to_apply)
     for day in days_list:
         if day in special_day_list:
             total.append(fixed_price)
