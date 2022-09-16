@@ -14,6 +14,8 @@ pandas = "^1.4.4"
 django-environ = "^0.9.0"
 psycopg2 = "^2.9.3"
 pytest-django = "^4.5.2"
+ipdb = "^0.13.9"
+mypy = "^0.971"
 
 [tool.poetry.dev-dependencies]
 

@@ -7,10 +7,7 @@ from core.models import Booking
 
 def check_availability(request_data:Booking) -> bool:
     """Check that Booking is available for that Property.
-    Args:
-        request_data: The first parameter.
-    Returns:
-        True for success, False otherwise.
+    TODO: REFACTOR WITH LIST OF DAYS APPROACH
     """
     reservations_checked = []
     check_in = parse(request_data.get('date_start')).date()

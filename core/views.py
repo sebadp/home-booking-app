@@ -2,7 +2,6 @@ import pandas as pd
 from dateutil import parser
 from django_filters import rest_framework as filters
 from rest_framework import generics, status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from core.serializer import PropertySerializer, PricingRuleSerializer, BookingSerializer
@@ -39,7 +38,7 @@ class PricingRuleListView(generics.ListCreateAPIView):
 
 class PricingRuleDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Retrieve, update or delete a snippet PricingRule.
+    Retrieve, update or delete a PricingRule.
     """
     queryset = PricingRule.objects.all()
     serializer_class = PricingRuleSerializer
@@ -52,9 +51,10 @@ class BookingDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
 
+
 class BookingListView(generics.ListCreateAPIView):
     """
-    List all Bookings
+    List all Bookings.
     """
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
@@ -92,7 +92,6 @@ class BookingListView(generics.ListCreateAPIView):
 
         days_list = pd.date_range(request.data.get('date_start'), request.data.get('date_end'))
 
-
         rules_to_apply = get_rules_to_apply(days_list, property_pricing_rules)
 
         if not rules_to_apply:
@@ -111,4 +110,3 @@ class BookingListView(generics.ListCreateAPIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
