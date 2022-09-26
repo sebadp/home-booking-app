@@ -7,14 +7,14 @@ from rest_framework.response import Response
 from core.serializer import PropertySerializer, PricingRuleSerializer, BookingSerializer
 from .booking_helpers.availability import check_availability, check_reservation_is_valid
 from .booking_helpers.pricing_rules import get_rules_to_apply, apply_rules
-from .models import PricingRule, Property, Booking
+from .models import PricingRule, RentalProperty, Booking
 
 
 class PropertyListView(generics.ListCreateAPIView):
     """
     List all Propertys, or create a new Property.
     """
-    queryset = Property.objects.all()
+    queryset = RentalProperty.objects.all()
     serializer_class = PropertySerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = ('id', 'name')
@@ -24,7 +24,7 @@ class PropertyDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update or delete a Property instance.
     """
-    queryset = Property.objects.all()
+    queryset = RentalProperty.objects.all()
     serializer_class = PropertySerializer
 
 
@@ -59,7 +59,7 @@ class BookingListView(generics.ListCreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('id', 'property', 'date_start', 'date_end', 'final_price')
+    filterset_fields = ('id', 'rental_property', 'date_start', 'date_end', 'final_price')
 
     def post(self, request, *args, **kwargs):
         """
@@ -76,31 +76,32 @@ class BookingListView(generics.ListCreateAPIView):
             '400':
                 Description: Bad Request.
         """
-        valid_reservation = check_reservation_is_valid(request.data)
+        valid_reservation = check_reservation_is_valid(request_data=request.data)
         if not valid_reservation:
             # TODO: HANDLE THIS!
             pass
 
-        available_time_slot = check_availability(request.data)
+        available_time_slot = check_availability(request_data=request.data)
 
         if not available_time_slot:
             # TODO: HANDLE THIS!
             pass
 
-        selected_property = Property.objects.get(pk=request.data.get('property'))
-        property_pricing_rules = PricingRule.objects.filter(property=selected_property.id)
+        selected_property = RentalProperty.objects.get(pk=request.data.get('rental_property'))
+        property_pricing_rules = PricingRule.objects.filter(rental_property=selected_property.id)
 
         days_list = pd.date_range(request.data.get('date_start'), request.data.get('date_end'))
 
-        rules_to_apply = get_rules_to_apply(days_list, property_pricing_rules)
+        rules_to_apply = get_rules_to_apply(days_list=days_list, pricing_rules=property_pricing_rules)
 
         if not rules_to_apply:
             final_price = float(len(days_list) * selected_property.base_price)
         else:
-            final_price = apply_rules(days_list, selected_property.base_price, rules_to_apply)
+            final_price = apply_rules(days_list=days_list, base_price=selected_property.base_price,
+                                      rules_to_apply=rules_to_apply)
 
         data = {
-            "property": request.data.get('property'),
+            "rental_property": request.data.get('rental_property'),
             "date_start": parser.parse(request.data.get('date_start')).date(),
             "date_end": parser.parse(request.data.get('date_end')).date(),
             "final_price": final_price

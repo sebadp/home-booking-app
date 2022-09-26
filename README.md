@@ -1,14 +1,7 @@
-Southern Code Django challenge
+# Southern Code Django challenge
 
-This project is the resolution for the Southern Code Django challenge by Sebastián Dávila.
+This project is the resolution for the Southern Code Django challenge by **Sebastián Dávila**.
 
-# Requirements questions:
-###
-- If it has both(same rule a contition of min_stay_length and specific_day), it means both conditions need to be true.
-- In this case should we charge the fixed price for each day?
-###
-- If a rule has a price_modifier and a fixed_price, fixed_price should be used.
-- If this rule is min_stay_length, this means that is TOP priority?
 
 # Branches and tasks solved:
 
@@ -31,7 +24,29 @@ This project is the resolution for the Southern Code Django challenge by Sebasti
 - Please deploy the backend server in heroku or any similar free service
 - Extra points for a dockerized solution!
 
-# Deployed at Heroku:
+### SCDCM-7/add_swagger_docs(Not merged)
+- Add Swagger auto documentation                                                                                                               
+
+### SCDCM-8/check_typing_and_docstrings                                                    
+- Check typing and complete docstrings                                                                                                         
+
+### SCDCM-9/add_full_coverage_e2e_tests                                                    
+- Add PostgreSQL
+- Add End To End tests to cover edges
+
+### SCDCM-11/refactor_models
+- Rename Property model and fields to rental_property
+ 
+### SCDCM-12/fix_bug_double_condition_rule
+- Fix bug and clean code for readability.
+
+### SCDCM-13/aplly_named_arguments
+- Apply named arguments to functions calls.
+
+### SCDCM-10/add_unit_tests_and_handle_exceptions 
+- Work in progress, add unit tests and evelate coverage. Add exceptions.
+
+# Deployed at Heroku(Sept 11):
 - URL: https://rocky-reaches-56968.herokuapp.com/
 
 

@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class Property(models.Model):
+class RentalProperty(models.Model):
     """
         Model that represents a property.
         A property could be a house, a flat, a hotel room, etc.
@@ -19,7 +19,7 @@ class PricingRule(models.Model):
         Only one rule can apply per day.
         We can have multiple rules for the same day, but only the most relevant rule applies.
     """
-    property = models.ForeignKey('core.Property', blank=False, null=False, on_delete=models.CASCADE)
+    rental_property = models.ForeignKey('core.RentalProperty', blank=False, null=False, on_delete=models.CASCADE)
     """property: This rule is applied to a particular property"""
     price_modifier = models.FloatField(null=True, blank=True)
     """price_modifier: Represents a percentage that can be positive (increment) or negative (discount)"""
@@ -48,7 +48,7 @@ class Booking(models.Model):
         A booking is done when a customer books a property for a given range of days.
         The booking model is also in charge of calculating the final price the customer will pay.
     """
-    property = models.ForeignKey('core.Property', blank=False, null=False, on_delete=models.CASCADE)
+    rental_property = models.ForeignKey('core.RentalProperty', blank=False, null=False, on_delete=models.CASCADE)
     """property: The property this booking is for"""
     date_start = models.DateField(blank=False, null=False)
     """date_start: First day of the booking"""

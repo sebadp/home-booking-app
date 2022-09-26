@@ -1,4 +1,4 @@
-from .models import PricingRule, Property, Booking
+from .models import PricingRule, RentalProperty, Booking
 from rest_framework import serializers
 
 
@@ -10,7 +10,7 @@ class PricingRuleSerializer(serializers.ModelSerializer):
 
 class PropertySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Property
+        model = RentalProperty
         fields = '__all__'
 
 

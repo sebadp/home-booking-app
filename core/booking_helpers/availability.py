@@ -7,12 +7,14 @@ from core.models import Booking
 
 def check_availability(request_data:Booking) -> bool:
     """Check that Booking is available for that Property.
-    TODO: REFACTOR WITH LIST OF DAYS APPROACH
+    TODO: REFACTOR WITH LIST OF DAYS APPROACH............. line 15. add filter with dates.
+                                                            if
     """
     reservations_checked = []
     check_in = parse(request_data.get('date_start')).date()
     check_out = parse(request_data.get('date_end')).date()
-    booking_list = Booking.objects.filter(property=request_data.get('property'))
+    booking_list = Booking.objects.filter(rental_property=request_data.get('rental_property'))
+
     for booking in booking_list:
         if booking.date_start > check_out or booking.date_end < check_in:
             reservations_checked.append(True)
