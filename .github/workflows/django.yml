@@ -1,0 +1,49 @@
+
+name: Django CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.9]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DEBUG: ${{ secrets.DEBUG }}
+        DJANGO_SETTINGS_MODULE: ${{ secrets.POETRY_DJANGO_SETTINGS_MODULE }}
+        POETRY_DJANGO_SETTINGS_MODULE: ${{ secrets.POETRY_DJANGO_SETTINGS_MODULE }}
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+
+      run: |
+        python -m pip install --upgrade pip
+        pip3 install poetry
+        poetry install
+        poetry run python3 manage.py makemigrations
+        poetry run python3 manage.py migrate
+    - name: Run Tests
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DEBUG: ${{ secrets.DEBUG }}
+        DJANGO_SETTINGS_MODULE: ${{ secrets.POETRY_DJANGO_SETTINGS_MODULE }}
+        POETRY_DJANGO_SETTINGS_MODULE: ${{ secrets.POETRY_DJANGO_SETTINGS_MODULE }}
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+      run: |
+        poetry run pytest
+      
