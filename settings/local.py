@@ -19,7 +19,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'new_project_db_1',
+        'HOST': 'localhost',
         'PORT': 5432,
         'TEST': {
             'NAME': 'testing_db',
