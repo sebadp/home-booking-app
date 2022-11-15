@@ -1,6 +1,6 @@
-# Southern Code Django challenge
+#  Django challenge
 
-This project is the resolution for the Southern Code Django challenge by **Sebastián Dávila**.
+This project is the resolution for a Django challenge by **Sebastián Dávila**.
 
 
 # Branches and tasks solved:
