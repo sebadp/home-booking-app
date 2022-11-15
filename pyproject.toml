@@ -2,7 +2,7 @@
 name = "django-challenge-sc"
 version = "0.2.0"
 description = ""
-authors = ["Malazay SouthernCode <alexisgiovoglanian@southerncode.us>"]
+authors = ["Sebastián Dávila"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
